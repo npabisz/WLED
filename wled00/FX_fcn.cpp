@@ -1521,6 +1521,11 @@ void WS2812FX::blendSegment(const Segment &topSegment) const {
   else if (blendingStyle == TRANSITION_INSIDE_OUT_MIRROR) blendingStyle = (bri == 0 || !topSegment.on) ? TRANSITION_OUTSIDE_IN : TRANSITION_INSIDE_OUT;
   const unsigned dw = (blendingStyle==TRANSITION_OUTSIDE_IN ? progInv : progress) * width / 0xFFFFU + 1;
   const unsigned dh = (blendingStyle==TRANSITION_OUTSIDE_IN ? progInv : progress) * height / 0xFFFFU + 1;
+  // Inside-out/Outside-in fronts are scaled so both reach their ends at the same time
+  const int      cx  = width * constrain((int)blendingCenterPct, 0, 100) / 100;
+  const int      prC = (blendingStyle==TRANSITION_OUTSIDE_IN) ? (int)progInv : (int)progress;
+  const int      dwl = prC * cx / 0xFFFF + 1;
+  const int      dwr = prC * (width - cx) / 0xFFFF + 1;
   if (width*height == 1) blendingStyle = TRANSITION_FADE; // disable style for single pixel segments (use fade instead)
   switch (blendingStyle) {
     case TRANSITION_CIRCULAR_IN: // (must set entire segment, see isPixelXYClipped())
@@ -1537,10 +1542,10 @@ void WS2812FX::blendSegment(const Segment &topSegment) const {
       Segment::setClippingRect(width - dw, width, 0, height);
       break;
     case TRANSITION_OUTSIDE_IN:   // corners
-      Segment::setClippingRect((width + dw)/2, (width - dw)/2, (height + dh)/2, (height - dh)/2); // inverted!!
+      Segment::setClippingRect(min(width, cx + dwr), max(0, cx - dwl), (height + dh)/2, (height - dh)/2); // inverted!!
       break;
     case TRANSITION_INSIDE_OUT:  // outward
-      Segment::setClippingRect((width - dw)/2, (width + dw)/2, (height - dh)/2, (height + dh)/2);
+      Segment::setClippingRect(max(0, cx - dwl), min(width, cx + dwr), (height - dh)/2, (height + dh)/2);
       break;
     case TRANSITION_SWIPE_DOWN:  // top-to-bottom (2D)
     case TRANSITION_PUSH_DOWN:   // top-to-bottom (2D)
@@ -1645,7 +1650,9 @@ void WS2812FX::blendSegment(const Segment &topSegment) const {
         // workaround for On/Off transition
         // (bri != briT) && !bri => from On to Off
         // (bri != briT) &&  bri => from Off to On
-        if ((briOld == 0 || bri == 0) && ((!clipped && (bri != briT) && !bri) || (clipped && (bri != briT) && bri))) c_a = BLACK;
+        // note: only blank pixels once the segment transition has actually started; bri changes before
+        // startTransition() is called (stateUpdated()) and a frame rendered in that window would blank the whole segment
+        if (topSegment.isInTransition() && (briOld == 0 || bri == 0) && ((!clipped && (bri != briT) && !bri) || (clipped && (bri != briT) && bri))) c_a = BLACK;
       }
       // map it into frame buffer
       x = c;  // restore coordiates if we were PUSHing
@@ -1717,7 +1724,9 @@ void WS2812FX::blendSegment(const Segment &topSegment) const {
         // workaround for On/Off transition
         // (bri != briT) && !bri => from On to Off
         // (bri != briT) &&  bri => from Off to On
-        if ((briOld == 0 || bri == 0) && ((!clipped && (bri != briT) && !bri) || (clipped && (bri != briT) && bri))) c_a = BLACK;
+        // note: only blank pixels once the segment transition has actually started; bri changes before
+        // startTransition() is called (stateUpdated()) and a frame rendered in that window would blank the whole segment
+        if (topSegment.isInTransition() && (briOld == 0 || bri == 0) && ((!clipped && (bri != briT) && !bri) || (clipped && (bri != briT) && bri))) c_a = BLACK;
       }
       // map into frame buffer
       i = k; // restore index if we were PUSHing
