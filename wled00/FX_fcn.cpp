@@ -1515,9 +1515,12 @@ void WS2812FX::blendSegment(const Segment &topSegment) const {
   Segment::setClippingRect(0, 0);  // disable clipping by default
   const unsigned progress = topSegment.progress();
   const unsigned progInv  = 0xFFFFU - progress;
+  const unsigned orgBS = blendingStyle;
+  // mirrored styles: use the counterpart geometry when powering off, so the off animation retraces the on animation
+  if      (blendingStyle == TRANSITION_OUTSIDE_IN_MIRROR) blendingStyle = (bri == 0 || !topSegment.on) ? TRANSITION_INSIDE_OUT : TRANSITION_OUTSIDE_IN;
+  else if (blendingStyle == TRANSITION_INSIDE_OUT_MIRROR) blendingStyle = (bri == 0 || !topSegment.on) ? TRANSITION_OUTSIDE_IN : TRANSITION_INSIDE_OUT;
   const unsigned dw = (blendingStyle==TRANSITION_OUTSIDE_IN ? progInv : progress) * width / 0xFFFFU + 1;
   const unsigned dh = (blendingStyle==TRANSITION_OUTSIDE_IN ? progInv : progress) * height / 0xFFFFU + 1;
-  const unsigned orgBS = blendingStyle;
   if (width*height == 1) blendingStyle = TRANSITION_FADE; // disable style for single pixel segments (use fade instead)
   switch (blendingStyle) {
     case TRANSITION_CIRCULAR_IN: // (must set entire segment, see isPixelXYClipped())

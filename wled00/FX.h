@@ -401,6 +401,8 @@ extern byte realtimeMode;           // used in getMappedPixelIndex()
 #define TRANSITION_PUSH_BR         0x16  // 2D (& 0b00010000)
 #define TRANSITION_PUSH_BL         0x17  // 2D (& 0b00010000)
 #define TRANSITION_PUSH_MASK       0x10
+#define TRANSITION_OUTSIDE_IN_MIRROR 0x18  // 1D or 2D: Outside-in when turning on, Inside-out when turning off
+#define TRANSITION_INSIDE_OUT_MIRROR 0x19  // 1D or 2D: Inside-out when turning on, Outside-in when turning off
 #define TRANSITION_COUNT           18
 
 
