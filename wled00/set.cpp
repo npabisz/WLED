@@ -386,6 +386,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
     t = request->arg(F("TD")).toInt();
     if (t >= 0) transitionDelayDefault = t;
+    if (request->hasArg(F("TS"))) blendingStyle = request->arg(F("TS")).toInt() & 0x1F; // only if the form actually has the field (stale cached page)
     t = request->arg(F("TP")).toInt();
     randomPaletteChangeTime = MIN(255,MAX(1,t));
     useHarmonicRandomPalette = request->hasArg(F("TH"));

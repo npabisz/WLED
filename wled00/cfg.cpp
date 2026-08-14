@@ -536,6 +536,8 @@ bool deserializeConfig(JsonObject doc, bool fromFS) {
   int tdd = light_tr["dur"] | -1;
   if (tdd >= 0) transitionDelay = transitionDelayDefault = tdd * 100;
   strip.setTransition(transitionDelayDefault);
+  CJSON(blendingStyle, light_tr[F("style")]);
+  blendingStyle &= 0x1F;
   CJSON(randomPaletteChangeTime, light_tr[F("rpc")]);
   CJSON(useHarmonicRandomPalette, light_tr[F("hrp")]);
 
@@ -1076,6 +1078,7 @@ void serializeConfig(JsonObject root) {
 
   JsonObject light_tr = light.createNestedObject("tr");
   light_tr["dur"] = transitionDelayDefault / 100;
+  light_tr[F("style")] = blendingStyle;
   light_tr[F("rpc")] = randomPaletteChangeTime;
   light_tr[F("hrp")] = useHarmonicRandomPalette;
 
