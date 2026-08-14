@@ -507,6 +507,13 @@ void WLED::setup()
     handlePresets();  // handle boot preset
     handlePlaylist(); // handle playlist if preset queued one
     handlePresets();  // handle presets again to give a chance for anything queued by the boot preset or playlist
+    if (!turnOnAtBoot && bri) {
+      // a boot preset saved with brightness carries "on":true and would override the power-up setting;
+      // keep the strip dark but remember the preset brightness for the first turn-on (nothing is rendered until loop())
+      briLast = bri;
+      bri = 0;
+      colorUpdated(CALL_MODE_INIT);
+    }
   }
   
   if (strcmp(multiWiFi[0].clientSSID, DEFAULT_CLIENT_SSID) == 0 && !configBackupExists())

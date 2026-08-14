@@ -440,6 +440,7 @@ void getSettingsJS(byte subPage, Print& settingsScript)
     printSetFormCheckbox(settingsScript,PSTR("GC"),gammaCorrectCol);
     dtostrf(gammaCorrectVal,3,1,nS); printSetFormValue(settingsScript,PSTR("GV"),nS);
     printSetFormValue(settingsScript,PSTR("TD"),transitionDelayDefault);
+    printSetFormValue(settingsScript,PSTR("TS"),blendingStyle);
     printSetFormValue(settingsScript,PSTR("TP"),randomPaletteChangeTime);
     printSetFormCheckbox(settingsScript,PSTR("TH"),useHarmonicRandomPalette);
     printSetFormValue(settingsScript,PSTR("BF"),briMultiplier);
